@@ -49,6 +49,7 @@ SOFTWARE.
 int main(void)
 {
   int i = 0;
+  int button;
 
   /**
   *  IMPORTANT NOTE!
@@ -67,25 +68,68 @@ int main(void)
   *  system_stm32l1xx.c file
   */
    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA,ENABLE);
+   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC,ENABLE);
+
    GPIOA->MODER |=(0b01)<<(10);
    GPIOA->OTYPER &=~((1)<<5);
    GPIOA->PUPDR |=(0b01)<<(10);
    GPIOA->OSPEEDR |=(0b11)<<(10);
 
+   GPIOC->MODER |= ((0b00)<<(26));
+   GPIOC->OTYPER &= ~((0b1)<<13);
+   GPIOC->PUPDR |= ((0b00)<<(26));
+
   /* TODO - Add your application code here */
+
+   //uloha1
 GPIOA->ODR |=1<<5;
 
 GPIOA->ODR &=~((1)<<5);
 
 
 GPIOA->BSRRL |=1<<5;
+
 GPIOA->BSRRH |=(1<<5);
+
+
+int impulz=0;
 
 
   /* Infinite loop */
   while (1)
-  {
-	i++;
+  {   //uloha1-1
+	  if( (GPIOA->ODR>>5 && 0b00)){GPIOA->ODR |=1<<5;impulz=0;}
+	  delay(10000);
+	  if( (GPIOA->ODR>>5 && 0b01)){GPIOA->ODR &=~((1)<<5);impulz=0;}
+	  //uloha2
+
+	  if(((GPIOC->IDR>>13)& 0b01)==1)
+	  		button=0 ;
+	  	else
+	  		button=1;
+   //uloha3-1
+	  for(int i=0;i<1000000;i++){
+
+	  }
+	  GPIOA->ODR |=1<<5;
+
+	  for(int i=0;i<1000000;i++){
+
+	  }
+	  GPIOA->ODR &=~((1)<<5);
+
+	  //uloha3-2
+	  if (button==1){GPIOA->ODR |=1<<5;}
+	  if(button==0){ GPIOA->ODR &=~((1)<<5);}
+	  //uloha3-3
+	  if(button==1){
+		  impulz=impulz+1;
+		  if(impulz==10){
+			  if( (GPIOA->ODR>>5 && 0b00)){GPIOA->ODR |=1<<5;impulz=0;}
+			  if( (GPIOA->ODR>>5 && 0b01)){GPIOA->ODR &=~((1)<<5);impulz=0;}
+		  }
+	  }
+	  if(button==0){impulz=0;}
   }
   return 0;
 }
