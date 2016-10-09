@@ -67,29 +67,31 @@ int main(void)
   *  To reconfigure the default setting of SystemInit() function, refer to
   *  system_stm32l1xx.c file
   */
-   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA,ENABLE);
-   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC,ENABLE);
+   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA,ENABLE);  // Zapnutie hodin na periferii
+   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC,ENABLE);   // Zapnutie hodin na periferii
 
-   GPIOA->MODER |=(0b01)<<(10);
+   GPIOA->MODER |=(0b01)<<(10);   // nastavenie modu na vystup
    GPIOA->OTYPER &=~((1)<<5);
    GPIOA->PUPDR |=(0b01)<<(10);
    GPIOA->OSPEEDR |=(0b11)<<(10);
 
-   GPIOC->MODER |= ((0b00)<<(26));
+   GPIOC->MODER |= ((0b00)<<(26));   // nastavenie modu na vystup
    GPIOC->OTYPER &= ~((0b1)<<13);
-   GPIOC->PUPDR |= ((0b00)<<(26));
+   GPIOC->PUPDR |= ((0b00)<<(26));   // nastavenie UP
 
   /* TODO - Add your application code here */
 
    //uloha1
-GPIOA->ODR |=1<<5;
+GPIOA->ODR |=1<<5;   // zasvietenie LED
 
-GPIOA->ODR &=~((1)<<5);
+GPIOA->ODR &=~((1)<<5);  // Zhasnutie led
 
 
-GPIOA->BSRRL |=1<<5;
+GPIOA->BSRRL |=1<<5;       // nastavenie High
 
-GPIOA->BSRRH |=(1<<5);
+GPIOA->BSRRH |=(1<<5);     // nastavenie low
+
+GPIOA->BSRRL |=1<<5;     // nastavenie high
 
 
 int impulz=0;
@@ -98,16 +100,38 @@ int impulz=0;
   /* Infinite loop */
   while (1)
   {   //uloha1-1
-	  if( (GPIOA->ODR>>5 && 0b00)){GPIOA->ODR |=1<<5;impulz=0;}
-	  delay(10000);
-	  if( (GPIOA->ODR>>5 && 0b01)){GPIOA->ODR &=~((1)<<5);impulz=0;}
+/*
+	  if(GPIOA->ODR & ((uint32_t)(1<<5)) )     // zistenie ci je led zapnuta alebo nie
+	  {
+		  GPIOA->ODR &=~((1)<<5);                // ak ano zhasni
+
+	  }
+
+	  //delay(10000);
+	  else{
+
+		  GPIOA->ODR |=1<<5;                  // ak nie zasviet
+
+	  }
+
+	  for(int i=0;i<1000000;i++){             // pauza na blikanie
+
+	 	  }
+
+	 	  */
+
+
 	  //uloha2
 
-	  if(((GPIOC->IDR>>13)& 0b01)==1)
-	  		button=0 ;
-	  	else
-	  		button=1;
-   //uloha3-1
+	  if(GPIOC->IDR & ((uint32_t)(1<<13))){     // precitanie stavu tlacidla
+	  		button=0 ;                           // nestlacene
+	  }
+	  	else{
+	  		button=1;                             //stlacene
+	  	}
+
+   //uloha3-1         blikanie LED
+/*
 	  for(int i=0;i<1000000;i++){
 
 	  }
@@ -117,19 +141,33 @@ int impulz=0;
 
 	  }
 	  GPIOA->ODR &=~((1)<<5);
-
-	  //uloha3-2
+*/
+/*
+	  //uloha3-2                                 // svietenie podla stlacenia tlacidla
 	  if (button==1){GPIOA->ODR |=1<<5;}
 	  if(button==0){ GPIOA->ODR &=~((1)<<5);}
-	  //uloha3-3
+
+
+	  //uloha3-3                 ///prepinanie stavu LED pomocou tlacidla
+*/
+
 	  if(button==1){
+
 		  impulz=impulz+1;
-		  if(impulz==10){
-			  if( (GPIOA->ODR>>5 && 0b00)){GPIOA->ODR |=1<<5;impulz=0;}
-			  if( (GPIOA->ODR>>5 && 0b01)){GPIOA->ODR &=~((1)<<5);impulz=0;}
+		  if(impulz>=10){              // iba ak je stlacene nad 10 impulzov
+			  if(GPIOA->ODR & ((uint32_t)(1<<5)) ){              // zistenie ci je led zapnuta alebo nie
+				  GPIOA->ODR &=~((1)<<5);
+
+			  }
+			  else{
+				  GPIOA->ODR |=1<<5;
+
+			  }
 		  }
 	  }
-	  if(button==0){impulz=0;}
+
+	  if(button==0){impulz=0;}       // vynulovanie pocitadl impulzov po uvolneni tlacidla
+
   }
   return 0;
 }
